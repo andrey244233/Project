@@ -3,6 +3,7 @@ package com.example.home_pc.project;
 
 import android.app.FragmentManager;
 
+import android.nfc.Tag;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -34,7 +35,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -55,19 +55,43 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         selectItem(identifier);
         Log.v("TAG", "ID = " + identifier);
+
+        getSupportFragmentManager().addOnBackStackChangedListener(onBackStackChangedListener);
     }
+
+    android.support.v4.app.FragmentManager.OnBackStackChangedListener onBackStackChangedListener = new android.support.v4.app.FragmentManager.OnBackStackChangedListener() {
+        @Override
+        public void onBackStackChanged() {
+            Fragment fragment = getSupportFragmentManager().findFragmentByTag("visible");
+            if (fragment instanceof MainFragment) {
+                identifier = 0;
+                setTitle(getString(R.string.app_name));
+            } else if (fragment instanceof PicturesFragment) {
+                identifier = 1;
+                setTitle("картинки");
+            } else {
+                identifier = 2;
+                setTitle("избранное");
+            }
+            NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+            navigationView.getMenu().getItem(identifier).setChecked(true);
+        }
+    };
 
     @Override
     public void onBackPressed() {
-        // selectItem(identifier);
-
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
-            super.onBackPressed();
+            if (identifier == 0) {
+                finish();
+            } else {
+                super.onBackPressed();
+            }
         }
     }
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -81,7 +105,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         super.onSaveInstanceState(outState);
         outState.putInt("id", identifier);
         outState.putString("title", getTitle().toString());
-
     }
 
     @Override
@@ -155,16 +178,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 break;
         }
 
-//                if (fragment == null) {
-//                    return;
-//                }
         navigationView.getMenu().getItem(identifier).setChecked(true);
-        FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction().replace(R.id.container, fragment);
+        FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction().replace(R.id.container, fragment, "visible");
         fragmentTransaction.addToBackStack(null);
+        //fragmentTransaction.addToBackStack();
         fragmentTransaction.commit();
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
     }
-
 
 }
