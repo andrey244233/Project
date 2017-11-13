@@ -3,6 +3,7 @@ package com.example.home_pc.project;
 
 import android.app.FragmentManager;
 
+import android.nfc.Tag;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -34,7 +35,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -54,8 +54,29 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         navigationView.setNavigationItemSelectedListener(this);
 
         selectItem(identifier);
-        Log.v("TAG", "ID = "  + identifier);
+        Log.v("TAG", "ID = " + identifier);
+
+        getSupportFragmentManager().addOnBackStackChangedListener(onBackStackChangedListener);
     }
+
+    android.support.v4.app.FragmentManager.OnBackStackChangedListener onBackStackChangedListener = new android.support.v4.app.FragmentManager.OnBackStackChangedListener() {
+        @Override
+        public void onBackStackChanged() {
+            Fragment fragment = getSupportFragmentManager().findFragmentByTag("visible");
+            if (fragment instanceof MainFragment) {
+                identifier = 0;
+                setTitle(getString(R.string.app_name));
+            } else if (fragment instanceof PicturesFragment) {
+                identifier = 1;
+                setTitle("картинки");
+            } else {
+                identifier = 2;
+                setTitle("избранное");
+            }
+            NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+            navigationView.getMenu().getItem(identifier).setChecked(true);
+        }
+    };
 
     @Override
     public void onBackPressed() {
@@ -63,9 +84,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
-            super.onBackPressed();
+            if (identifier == 0) {
+                finish();
+            } else {
+                super.onBackPressed();
+            }
         }
     }
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -79,7 +105,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         super.onSaveInstanceState(outState);
         outState.putInt("id", identifier);
         outState.putString("title", getTitle().toString());
-
     }
 
     @Override
@@ -111,53 +136,55 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         int id = item.getItemId();
         switch (id) {
             case R.id.nav_main:
+                item.setChecked(true);
                 selectItem(0);
-                Log.v("TAG", "ID = "  + identifier);
+                Log.v("TAG", "ID = " + identifier);
                 setTitle(getString(R.string.app_name));
                 break;
             case R.id.nav_pictures:
+                item.setChecked(true);
                 selectItem(1);
-                Log.v("TAG", "ID = "  + identifier);
+                Log.v("TAG", "ID = " + identifier);
                 setTitle("Картинки");
                 break;
             case R.id.nav_favorites:
+                item.setChecked(true);
                 selectItem(2);
-                Log.v("TAG", "ID = "  + identifier);
+                Log.v("TAG", "ID = " + identifier);
                 setTitle("Избранное");
                 break;
         }
         return true;
     }
 
-            private void selectItem(int id){
-                Fragment fragment = null;
-                switch (id){
-                    case 0:
-                        identifier = 0;
-                        fragment = new MainFragment();
-                        Log.v("TAG", "ID = "  + id);
-                        break;
-                    case 1:
-                        identifier = 1;
-                        fragment = new PicturesFragment();
-                        Log.v("TAG", "ID = "  + id);
-                        break;
-                    case 2:
-                        identifier = 2;
-                        fragment = new FavoritesFragment();
-                        Log.v("TAG", "ID = "  + id);
-                        break;
-                }
+    private void selectItem(int id) {
+        Fragment fragment = null;
+        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        switch (id) {
+            case 0:
+                identifier = 0;
+                fragment = new MainFragment();
+                Log.v("TAG", "ID = " + id);
+                break;
+            case 1:
+                identifier = 1;
+                fragment = new PicturesFragment();
+                Log.v("TAG", "ID = " + id);
+                break;
+            case 2:
+                identifier = 2;
+                fragment = new FavoritesFragment();
+                Log.v("TAG", "ID = " + id);
+                break;
+        }
 
-//                if (fragment == null) {
-//                    return;
-//                }
-                FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction().replace(R.id.container, fragment);
-                fragmentTransaction.addToBackStack(null);
-                fragmentTransaction.commit();
-                DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-                drawer.closeDrawer(GravityCompat.START);
-            }
-
+        navigationView.getMenu().getItem(identifier).setChecked(true);
+        FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction().replace(R.id.container, fragment, "visible");
+        fragmentTransaction.addToBackStack(null);
+        //fragmentTransaction.addToBackStack();
+        fragmentTransaction.commit();
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        drawer.closeDrawer(GravityCompat.START);
+    }
 
 }
