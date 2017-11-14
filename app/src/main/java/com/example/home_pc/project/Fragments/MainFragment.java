@@ -1,6 +1,7 @@
 package com.example.home_pc.project.Fragments;
 
 
+import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -14,11 +15,12 @@ import com.example.home_pc.project.R;
  * Use the {@link MainFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class MainFragment extends Fragment {
+public class MainFragment extends BaseFragment {
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
+    private static final String TOOLBAR_TITLE_FIRST = "Project";
 
     // TODO: Rename and change types of parameters
     private String mParam1;
@@ -63,4 +65,13 @@ public class MainFragment extends Fragment {
         return inflater.inflate(R.layout.fragment_main, container, false);
     }
 
+
+    @Override
+    public void onStart() {
+        super.onStart();
+    }
+
+    public String setTitles() {
+        return  TOOLBAR_TITLE_FIRST;
+    }
 }

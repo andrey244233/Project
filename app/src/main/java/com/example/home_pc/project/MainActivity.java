@@ -1,14 +1,8 @@
 package com.example.home_pc.project;
 
-
-import android.app.FragmentManager;
-
-import android.nfc.Tag;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
 import android.view.View;
 import android.support.design.widget.NavigationView;
@@ -20,22 +14,33 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import com.example.home_pc.project.Fragments.FavoritesFragment;
-import com.example.home_pc.project.Fragments.MainFragment;
-import com.example.home_pc.project.Fragments.PicturesFragment;
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
     private static int identifier;
+    private static final String ID = "id";
+    private static final String TITLE = "title";
+    private static final int MAIN_PAGE = 0;
+    private static final int IMAGE_PAGE = 1;
+    private static final int FAVORITE_PAGE = 2;
+    NavigationRouter navigationRouter;
+
+    @BindView(R.id.toolbar) Toolbar toolbar;
+    @BindView(R.id.fab) FloatingActionButton fab;
+    @BindView(R.id.drawer_layout) DrawerLayout drawer;
+    @BindView(R.id.nav_view) NavigationView navigationView;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        ButterKnife.bind(this);
         setSupportActionBar(toolbar);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -44,58 +49,31 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
         });
 
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
-                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.addDrawerListener(toggle);
         toggle.syncState();
-
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-        selectItem(identifier);
-        Log.v("TAG", "ID = " + identifier);
-
-        getSupportFragmentManager().addOnBackStackChangedListener(onBackStackChangedListener);
+        navigationRouter = new NavigationRouter(this, navigationView, drawer);
+        identifier = navigationRouter.selectItem(identifier);
     }
-
-    android.support.v4.app.FragmentManager.OnBackStackChangedListener onBackStackChangedListener = new android.support.v4.app.FragmentManager.OnBackStackChangedListener() {
-        @Override
-        public void onBackStackChanged() {
-            Fragment fragment = getSupportFragmentManager().findFragmentByTag("visible");
-            if (fragment instanceof MainFragment) {
-                identifier = 0;
-                setTitle(getString(R.string.app_name));
-            } else if (fragment instanceof PicturesFragment) {
-                identifier = 1;
-                setTitle("картинки");
-            } else {
-                identifier = 2;
-                setTitle("избранное");
-            }
-            NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
-            navigationView.getMenu().getItem(identifier).setChecked(true);
-        }
-    };
 
     @Override
     public void onBackPressed() {
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
-            if (identifier == 0) {
+            if (identifier == MAIN_PAGE) {
                 finish();
             } else {
                 super.onBackPressed();
+                identifier = navigationRouter.switchFragment(identifier);
             }
         }
     }
 
-
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.main, menu);
         return true;
     }
@@ -103,30 +81,26 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putInt("id", identifier);
-        outState.putString("title", getTitle().toString());
+        outState.putInt(ID, identifier);
+        Log.e("TAG", "ID после вызова сейв инстанс = " + identifier);
+        outState.putString(TITLE, getTitle().toString());
     }
 
     @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
-        identifier = savedInstanceState.getInt("id");
-        String title = savedInstanceState.getString("title");
+        identifier = savedInstanceState.getInt(ID);
+        Log.e("TAG", "ID после вызова рестор инстанс = " + identifier);
+        String title = savedInstanceState.getString(TITLE);
         setTitle(title);
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
             return true;
         }
-
         return super.onOptionsItemSelected(item);
     }
 
@@ -137,54 +111,17 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         switch (id) {
             case R.id.nav_main:
                 item.setChecked(true);
-                selectItem(0);
-                Log.v("TAG", "ID = " + identifier);
-                setTitle(getString(R.string.app_name));
+                identifier = navigationRouter.selectItem(MAIN_PAGE);
                 break;
             case R.id.nav_pictures:
                 item.setChecked(true);
-                selectItem(1);
-                Log.v("TAG", "ID = " + identifier);
-                setTitle("Картинки");
+                identifier = navigationRouter.selectItem(IMAGE_PAGE);
                 break;
             case R.id.nav_favorites:
                 item.setChecked(true);
-                selectItem(2);
-                Log.v("TAG", "ID = " + identifier);
-                setTitle("Избранное");
+                identifier = navigationRouter.selectItem(FAVORITE_PAGE);
                 break;
         }
         return true;
     }
-
-    private void selectItem(int id) {
-        Fragment fragment = null;
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
-        switch (id) {
-            case 0:
-                identifier = 0;
-                fragment = new MainFragment();
-                Log.v("TAG", "ID = " + id);
-                break;
-            case 1:
-                identifier = 1;
-                fragment = new PicturesFragment();
-                Log.v("TAG", "ID = " + id);
-                break;
-            case 2:
-                identifier = 2;
-                fragment = new FavoritesFragment();
-                Log.v("TAG", "ID = " + id);
-                break;
-        }
-
-        navigationView.getMenu().getItem(identifier).setChecked(true);
-        FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction().replace(R.id.container, fragment, "visible");
-        fragmentTransaction.addToBackStack(null);
-        //fragmentTransaction.addToBackStack();
-        fragmentTransaction.commit();
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        drawer.closeDrawer(GravityCompat.START);
-    }
-
 }
