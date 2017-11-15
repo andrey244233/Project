@@ -45,7 +45,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         toggle.syncState();
         navigationView.setNavigationItemSelectedListener(this);
 
-        if (savedInstanceState == null) {
+        if (ID == null) {
             identifier = MAIN_PAGE;
         }else{
             SharedPreferences sharedPref = this.getPreferences(this.MODE_PRIVATE);
