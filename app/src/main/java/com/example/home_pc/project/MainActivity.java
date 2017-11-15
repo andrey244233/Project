@@ -1,190 +1,118 @@
 package com.example.home_pc.project;
 
-
-import android.app.FragmentManager;
-
-import android.nfc.Tag;
+import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentTransaction;
-import android.util.Log;
-import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.view.Menu;
 import android.view.MenuItem;
-
-import com.example.home_pc.project.Fragments.FavoritesFragment;
-import com.example.home_pc.project.Fragments.MainFragment;
-import com.example.home_pc.project.Fragments.PicturesFragment;
+import com.example.home_pc.project.Fragments.FragmentForMainPage;
+import com.example.home_pc.project.Fragments.FragmentForPicturesPage;
+import butterknife.BindView;
+import butterknife.ButterKnife;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
-    private static int identifier;
+    private int identifier;
+    private static final String ID = "id";
+    private static final int MAIN_PAGE = 0;
+    private static final int IMAGE_PAGE = 1;
+    private static final int FAVORITE_PAGE = 2;
+    private static final String TAG_VISIBLE = "visible";
+    NavigationRouter navigationRouterInstance;
+
+    @BindView(R.id.toolbar)
+    Toolbar toolbar;
+    @BindView(R.id.drawer_layout)
+    DrawerLayout drawer;
+    @BindView(R.id.nav_view)
+    NavigationView navigationView;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        ButterKnife.bind(this);
         setSupportActionBar(toolbar);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
-
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
-                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.addDrawerListener(toggle);
         toggle.syncState();
-
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-        selectItem(identifier);
-        Log.v("TAG", "ID = " + identifier);
-
-        getSupportFragmentManager().addOnBackStackChangedListener(onBackStackChangedListener);
-    }
-
-    android.support.v4.app.FragmentManager.OnBackStackChangedListener onBackStackChangedListener = new android.support.v4.app.FragmentManager.OnBackStackChangedListener() {
-        @Override
-        public void onBackStackChanged() {
-            Fragment fragment = getSupportFragmentManager().findFragmentByTag("visible");
-            if (fragment instanceof MainFragment) {
-                identifier = 0;
-                setTitle(getString(R.string.app_name));
-            } else if (fragment instanceof PicturesFragment) {
-                identifier = 1;
-                setTitle("картинки");
-            } else {
-                identifier = 2;
-                setTitle("избранное");
-            }
-            NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
-            navigationView.getMenu().getItem(identifier).setChecked(true);
-        }
-    };
-
-    @Override
-    public void onBackPressed() {
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        if (drawer.isDrawerOpen(GravityCompat.START)) {
-            drawer.closeDrawer(GravityCompat.START);
-        } else {
-            if (identifier == 0) {
-                finish();
-            } else {
-                super.onBackPressed();
-            }
-        }
-    }
-
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.main, menu);
-        return true;
-    }
-
-    @Override
-    protected void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-        outState.putInt("id", identifier);
-        outState.putString("title", getTitle().toString());
-    }
-
-    @Override
-    protected void onRestoreInstanceState(Bundle savedInstanceState) {
-        super.onRestoreInstanceState(savedInstanceState);
-        identifier = savedInstanceState.getInt("id");
-        String title = savedInstanceState.getString("title");
-        setTitle(title);
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
+        if (ID == null) {
+            identifier = MAIN_PAGE;
+        }else{
+            SharedPreferences sharedPref = this.getPreferences(this.MODE_PRIVATE);
+            identifier = sharedPref.getInt(ID, MAIN_PAGE);
         }
 
-        return super.onOptionsItemSelected(item);
+        navigationRouterInstance = NavigationRouter.getInstance(this);
+        navigationRouterInstance.openFragment(identifier);
+        navigationView.getMenu().getItem(identifier).setChecked(true);
     }
 
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
-        int id = item.getItemId();
-        switch (id) {
+        switch (item.getItemId()) {
             case R.id.nav_main:
                 item.setChecked(true);
-                selectItem(0);
-                Log.v("TAG", "ID = " + identifier);
-                setTitle(getString(R.string.app_name));
+                navigationRouterInstance.openFragment(MAIN_PAGE);
+                identifier = (MAIN_PAGE);
                 break;
             case R.id.nav_pictures:
                 item.setChecked(true);
-                selectItem(1);
-                Log.v("TAG", "ID = " + identifier);
-                setTitle("Картинки");
+                navigationRouterInstance.openFragment(IMAGE_PAGE);
+                identifier = (IMAGE_PAGE);
                 break;
             case R.id.nav_favorites:
                 item.setChecked(true);
-                selectItem(2);
-                Log.v("TAG", "ID = " + identifier);
-                setTitle("Избранное");
+                navigationRouterInstance.openFragment(FAVORITE_PAGE);
+                identifier = (FAVORITE_PAGE);
                 break;
         }
+        drawer.closeDrawer(GravityCompat.START);
         return true;
     }
 
-    private void selectItem(int id) {
-        Fragment fragment = null;
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
-        switch (id) {
-            case 0:
-                identifier = 0;
-                fragment = new MainFragment();
-                Log.v("TAG", "ID = " + id);
-                break;
-            case 1:
-                identifier = 1;
-                fragment = new PicturesFragment();
-                Log.v("TAG", "ID = " + id);
-                break;
-            case 2:
-                identifier = 2;
-                fragment = new FavoritesFragment();
-                Log.v("TAG", "ID = " + id);
-                break;
+    @Override
+    public void onBackPressed() {
+        if (drawer.isDrawerOpen(GravityCompat.START)) {
+            drawer.closeDrawer(GravityCompat.START);
+        } else {
+            if (identifier == MAIN_PAGE) {
+                finish();
+            } else {
+                super.onBackPressed();
+                switchFragment();
+            }
         }
-
-        navigationView.getMenu().getItem(identifier).setChecked(true);
-        FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction().replace(R.id.container, fragment, "visible");
-        fragmentTransaction.addToBackStack(null);
-        //fragmentTransaction.addToBackStack();
-        fragmentTransaction.commit();
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        drawer.closeDrawer(GravityCompat.START);
     }
 
+    private void switchFragment() {
+        Fragment show_fragment = getSupportFragmentManager().findFragmentByTag(TAG_VISIBLE);
+        if (show_fragment instanceof FragmentForMainPage) {
+            identifier = MAIN_PAGE;
+        } else if (show_fragment instanceof FragmentForPicturesPage) {
+            identifier = IMAGE_PAGE;
+        } else {
+            identifier = FAVORITE_PAGE;
+        }
+        navigationView.getMenu().getItem(identifier).setChecked(true);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        SharedPreferences sharedPref = this.getPreferences(this.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPref.edit();
+        editor.putInt(ID, identifier);
+        editor.commit();
+    }
 }
