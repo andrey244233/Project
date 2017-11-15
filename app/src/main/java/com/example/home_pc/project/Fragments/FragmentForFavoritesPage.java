@@ -11,22 +11,21 @@ import com.example.home_pc.project.R;
 
 /**
  * A simple {@link Fragment} subclass.
- * Use the {@link PicturesFragment#newInstance} factory method to
+ * Use the {@link FragmentForFavoritesPage#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class PicturesFragment extends BaseFragment {
+public class FragmentForFavoritesPage extends BaseFragment {
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
-    private static final String TOOLBAR_TITLE_SECOND = "Картинки";
 
     // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
 
 
-    public PicturesFragment() {
+    public FragmentForFavoritesPage() {
         // Required empty public constructor
     }
 
@@ -36,11 +35,11 @@ public class PicturesFragment extends BaseFragment {
      *
      * @param param1 Parameter 1.
      * @param param2 Parameter 2.
-     * @return A new instance of fragment PicturesFragment.
+     * @return A new instance of fragment FragmentForFavoritesPage.
      */
     // TODO: Rename and change types and number of parameters
-    public static PicturesFragment newInstance(String param1, String param2) {
-        PicturesFragment fragment = new PicturesFragment();
+    public static FragmentForFavoritesPage newInstance(String param1, String param2) {
+        FragmentForFavoritesPage fragment = new FragmentForFavoritesPage();
         Bundle args = new Bundle();
         args.putString(ARG_PARAM1, param1);
         args.putString(ARG_PARAM2, param2);
@@ -61,12 +60,17 @@ public class PicturesFragment extends BaseFragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_pictures, container, false);
+        return inflater.inflate(R.layout.fragment_favorites, container, false);
     }
 
     @Override
-    public String setTitles() {
-        return TOOLBAR_TITLE_SECOND;
+    public void onStart() {
+        super.onStart();
+        getScreenName();
     }
 
+    @Override
+    public void getScreenName() {
+        getActivity().setTitle(getResources().getString(R.string.toolbar_name_for_favorite_fragment));
+    }
 }
