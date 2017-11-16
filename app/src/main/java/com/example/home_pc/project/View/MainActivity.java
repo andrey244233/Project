@@ -1,4 +1,4 @@
-package com.example.home_pc.project;
+package com.example.home_pc.project.View;
 
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -10,8 +10,12 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
+
 import com.example.home_pc.project.Fragments.FragmentForMainPage;
 import com.example.home_pc.project.Fragments.FragmentForPicturesPage;
+import com.example.home_pc.project.Presentor.PresentorImpl;
+import com.example.home_pc.project.R;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
@@ -23,7 +27,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private static final int IMAGE_PAGE = 1;
     private static final int FAVORITE_PAGE = 2;
     private static final String TAG_VISIBLE = "visible";
-    NavigationRouter navigationRouterInstance;
+   // NavigationRouter navigationRouterInstance;
+    PresentorImpl presentor;
+
 
     @BindView(R.id.toolbar)
     Toolbar toolbar;
@@ -47,13 +53,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         if (ID == null) {
             identifier = MAIN_PAGE;
-        }else{
+        } else {
             SharedPreferences sharedPref = this.getPreferences(this.MODE_PRIVATE);
             identifier = sharedPref.getInt(ID, MAIN_PAGE);
         }
 
-        navigationRouterInstance = NavigationRouter.getInstance(this);
-        navigationRouterInstance.openFragment(identifier);
+//        navigationRouterInstance = NavigationRouter.getInstance(this);
+//        navigationRouterInstance.openFragment(identifier);
+        presentor = new PresentorImpl();
+        presentor.openFragment(identifier, this);
         navigationView.getMenu().getItem(identifier).setChecked(true);
     }
 
@@ -63,17 +71,17 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         switch (item.getItemId()) {
             case R.id.nav_main:
                 item.setChecked(true);
-                navigationRouterInstance.openFragment(MAIN_PAGE);
+                presentor.openFragment(MAIN_PAGE, this);
                 identifier = (MAIN_PAGE);
                 break;
             case R.id.nav_pictures:
                 item.setChecked(true);
-                navigationRouterInstance.openFragment(IMAGE_PAGE);
+                presentor.openFragment(IMAGE_PAGE, this);
                 identifier = (IMAGE_PAGE);
                 break;
             case R.id.nav_favorites:
                 item.setChecked(true);
-                navigationRouterInstance.openFragment(FAVORITE_PAGE);
+                presentor.openFragment(FAVORITE_PAGE, this);
                 identifier = (FAVORITE_PAGE);
                 break;
         }
@@ -93,6 +101,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 switchFragment();
             }
         }
+
+
     }
 
     private void switchFragment() {
@@ -115,4 +125,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         editor.putInt(ID, identifier);
         editor.commit();
     }
+
+
 }
