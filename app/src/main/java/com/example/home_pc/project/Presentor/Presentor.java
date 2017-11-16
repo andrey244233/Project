@@ -7,4 +7,5 @@ import android.content.Context;
 public interface Presentor {
 
   void openFragment(int id, Context context);
+  void handleTapInMainActivity(int id, Context context);
 }

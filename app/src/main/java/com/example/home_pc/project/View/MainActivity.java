@@ -1,5 +1,6 @@
 package com.example.home_pc.project.View;
 
+import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -13,13 +14,14 @@ import android.view.MenuItem;
 
 import com.example.home_pc.project.Fragments.FragmentForMainPage;
 import com.example.home_pc.project.Fragments.FragmentForPicturesPage;
+import com.example.home_pc.project.Presentor.Presentor;
 import com.example.home_pc.project.Presentor.PresentorImpl;
 import com.example.home_pc.project.R;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
+public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, View {
 
     private int identifier;
     private static final String ID = "id";
@@ -58,10 +60,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             identifier = sharedPref.getInt(ID, MAIN_PAGE);
         }
 
-//        navigationRouterInstance = NavigationRouter.getInstance(this);
-//        navigationRouterInstance.openFragment(identifier);
-        presentor = new PresentorImpl();
-        presentor.openFragment(identifier, this);
+        requestToPresentorToshowFragment(identifier);
         navigationView.getMenu().getItem(identifier).setChecked(true);
     }
 
@@ -71,18 +70,18 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         switch (item.getItemId()) {
             case R.id.nav_main:
                 item.setChecked(true);
-                presentor.openFragment(MAIN_PAGE, this);
                 identifier = (MAIN_PAGE);
+                requestToPresentorToshowFragment(identifier);
                 break;
             case R.id.nav_pictures:
                 item.setChecked(true);
-                presentor.openFragment(IMAGE_PAGE, this);
                 identifier = (IMAGE_PAGE);
+                requestToPresentorToshowFragment(identifier);
                 break;
             case R.id.nav_favorites:
                 item.setChecked(true);
-                presentor.openFragment(FAVORITE_PAGE, this);
                 identifier = (FAVORITE_PAGE);
+                requestToPresentorToshowFragment(identifier);
                 break;
         }
         drawer.closeDrawer(GravityCompat.START);
@@ -126,5 +125,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         editor.commit();
     }
 
-
+    @Override
+    public void requestToPresentorToshowFragment(int identifier){
+      PresentorImpl presentor = new PresentorImpl();
+      presentor.handleTapInMainActivity(identifier, this);
+    }
 }

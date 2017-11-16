@@ -15,4 +15,9 @@ public class PresentorImpl implements Presentor {
         NavigationRouter navigationRouterInstance = NavigationRouter.getInstance(context);
         navigationRouterInstance.openFragment(id);
     }
+
+    @Override
+    public void handleTapInMainActivity(int id, Context context) {
+        openFragment(id, context);
+    }
 }
