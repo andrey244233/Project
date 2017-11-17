@@ -9,7 +9,7 @@ import com.example.home_pc.project.Fragments.FragmentForMainPage;
 import com.example.home_pc.project.Fragments.FragmentForPicturesPage;
 import com.example.home_pc.project.R;
 
-public class NavigationRouter  {
+public class NavigationRouter implements Model  {
     private static final int MAIN_PAGE = 0;
     private static final int IMAGE_PAGE = 1;
     private static final int FAVORITE_PAGE = 2;
