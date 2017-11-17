@@ -4,21 +4,22 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.design.widget.NavigationView;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
+import com.example.home_pc.project.Fragments.FragmentForFavoritesPage;
 import com.example.home_pc.project.Fragments.FragmentForMainPage;
 import com.example.home_pc.project.Fragments.FragmentForPicturesPage;
-import com.example.home_pc.project.Presentor.Presentor;
-import com.example.home_pc.project.Presentor.PresentorImpl;
+import com.example.home_pc.project.Presentor.MainActivityPresentor;
 import com.example.home_pc.project.R;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, MainView {
+public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, MainActivityView {
 
     private int identifier;
     private static final String ID = "id";
@@ -33,8 +34,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     DrawerLayout drawer;
     @BindView(R.id.nav_view)
     NavigationView navigationView;
-    Presentor presentor;
-
+    MainActivityPresentor presentor;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,8 +55,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             identifier = sharedPref.getInt(ID, MAIN_PAGE);
         }
 
-        presentor = new PresentorImpl(this);
-        presentor.sentDataToModel(identifier, this);
+        openScreen(identifier);
         navigationView.getMenu().getItem(identifier).setChecked(true);
     }
 
@@ -67,17 +66,17 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             case R.id.nav_main:
                 item.setChecked(true);
                 identifier = (MAIN_PAGE);
-                presentor.sentDataToModel(identifier, this);
+                openScreen(identifier);
                 break;
             case R.id.nav_pictures:
                 item.setChecked(true);
                 identifier = (IMAGE_PAGE);
-                presentor.sentDataToModel(identifier, this);
+                openScreen(identifier);
                 break;
             case R.id.nav_favorites:
                 item.setChecked(true);
                 identifier = (FAVORITE_PAGE);
-                presentor.sentDataToModel(identifier, this);
+                openScreen(identifier);
                 break;
         }
         drawer.closeDrawer(GravityCompat.START);
@@ -98,7 +97,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
     }
 
-    private void switchFragment() {
+    public void switchFragment() {
         Fragment show_fragment = getSupportFragmentManager().findFragmentByTag(TAG_VISIBLE);
         if (show_fragment instanceof FragmentForMainPage) {
             identifier = MAIN_PAGE;
@@ -117,6 +116,25 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         SharedPreferences.Editor editor = sharedPref.edit();
         editor.putInt(ID, identifier);
         editor.commit();
+    }
+
+
+    public void openScreen(int id) {
+        Fragment showFragment = new FragmentForMainPage();
+        switch (id) {
+            case MAIN_PAGE:
+                showFragment = new FragmentForMainPage();
+                break;
+            case IMAGE_PAGE:
+                showFragment = new FragmentForPicturesPage();
+                break;
+            case FAVORITE_PAGE:
+                showFragment = new FragmentForFavoritesPage();
+                break;
+        }
+        FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction().replace(R.id.container, showFragment, TAG_VISIBLE);
+        fragmentTransaction.addToBackStack(null);
+        fragmentTransaction.commit();
     }
 
 
