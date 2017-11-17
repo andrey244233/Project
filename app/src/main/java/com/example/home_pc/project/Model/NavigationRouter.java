@@ -1,4 +1,4 @@
-package com.example.home_pc.project;
+package com.example.home_pc.project.Model;
 
 import android.content.Context;
 import android.support.v4.app.Fragment;
@@ -7,8 +7,9 @@ import android.support.v4.app.FragmentTransaction;
 import com.example.home_pc.project.Fragments.FragmentForFavoritesPage;
 import com.example.home_pc.project.Fragments.FragmentForMainPage;
 import com.example.home_pc.project.Fragments.FragmentForPicturesPage;
+import com.example.home_pc.project.R;
 
-public class NavigationRouter {
+public class NavigationRouter  {
     private static final int MAIN_PAGE = 0;
     private static final int IMAGE_PAGE = 1;
     private static final int FAVORITE_PAGE = 2;
@@ -42,5 +43,6 @@ public class NavigationRouter {
         fragmentTransaction.addToBackStack(null);
         fragmentTransaction.commit();
     }
+
 
 }
