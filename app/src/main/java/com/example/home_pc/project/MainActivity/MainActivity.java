@@ -1,9 +1,9 @@
-package com.example.home_pc.project.View;
+package com.example.home_pc.project.MainActivity;
 
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
 import android.support.design.widget.NavigationView;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -11,11 +11,13 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
-import com.example.home_pc.project.Fragments.FragmentForFavoritesPage;
-import com.example.home_pc.project.Fragments.FragmentForMainPage;
-import com.example.home_pc.project.Fragments.FragmentForPicturesPage;
-import com.example.home_pc.project.Presentor.MainActivityPresentor;
+
+import com.example.home_pc.project.Fragments.BaseFragment;
+import com.example.home_pc.project.Fragments.FragmentForMainPage.FragmentForMainPage;
+import com.example.home_pc.project.Fragments.FragmentForPicturesPage.FragmentForPicturesPage;
+import com.example.home_pc.project.Model.Model;
 import com.example.home_pc.project.R;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
@@ -34,7 +36,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     DrawerLayout drawer;
     @BindView(R.id.nav_view)
     NavigationView navigationView;
-    MainActivityPresentor presentor;
+    PresentorForMainActivity presentorForMainActivity;
+   // MainActivityPresentor presentor;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,6 +58,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             identifier = sharedPref.getInt(ID, MAIN_PAGE);
         }
 
+
+       // presentorForMainActivity
         openScreen(identifier);
         navigationView.getMenu().getItem(identifier).setChecked(true);
     }
@@ -120,16 +125,16 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
 
     public void openScreen(int id) {
-        Fragment showFragment = new FragmentForMainPage();
+        BaseFragment showFragment = null;
         switch (id) {
             case MAIN_PAGE:
-                showFragment = new FragmentForMainPage();
+                showFragment = requestToPresentor();
                 break;
             case IMAGE_PAGE:
-                showFragment = new FragmentForPicturesPage();
+                showFragment = requestToPresentor();
                 break;
             case FAVORITE_PAGE:
-                showFragment = new FragmentForFavoritesPage();
+                showFragment = requestToPresentor();
                 break;
         }
         FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction().replace(R.id.container, showFragment, TAG_VISIBLE);
@@ -138,4 +143,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
 
+    @Override
+    public BaseFragment requestToPresentor() {
+        PresentorForMainActivity presentorForMainActivity = new PresentorForMainActivity();
+        BaseFragment fragment = presentorForMainActivity.requestToModel(identifier);
+        return fragment;
+    }
 }
